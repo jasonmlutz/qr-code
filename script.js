@@ -10,12 +10,29 @@
   const downloadBtn = document.getElementById('download-btn');
   const postmarkDate = document.getElementById('postmark-date');
 
+  // Path to a bundled default logo, relative to index.html.
+  // Drop your image at this path in the repo, or change the path to match.
+  const DEFAULT_LOGO_SRC = 'assets/default-logo.png';
+
   let logoImage = null;
   let renderTimer = null;
 
   postmarkDate.textContent = new Date().toLocaleDateString('en-US', {
     month: 'short', day: '2-digit', year: 'numeric'
   });
+
+  function loadDefaultLogo() {
+    const img = new Image();
+    img.onload = () => {
+      logoImage = img;
+      logoClearBtn.hidden = false;
+      if (ecSelect.value !== 'H') ecSelect.value = 'H';
+      render();
+    };
+    // If the file isn't there, just start with no logo — no error shown to the user.
+    img.onerror = () => render();
+    img.src = DEFAULT_LOGO_SRC;
+  }
 
   function scheduleRender() {
     clearTimeout(renderTimer);
@@ -141,5 +158,5 @@
     link.click();
   });
 
-  render();
+  loadDefaultLogo();
 })();
