@@ -122,6 +122,24 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: normal;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.checkbox-row input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--stamp-red);
+  cursor: pointer;
+}
+
 .file-row {
   display: flex;
   align-items: center;
