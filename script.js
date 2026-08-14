@@ -2,6 +2,7 @@
   const textInput = document.getElementById('qr-text');
   const logoInput = document.getElementById('logo-upload');
   const logoClearBtn = document.getElementById('logo-clear');
+  const useDefaultCheckbox = document.getElementById('use-default-logo');
   const sizeSelect = document.getElementById('qr-size');
   const ecSelect = document.getElementById('ec-level');
   const ecHint = document.getElementById('ec-hint');
@@ -14,23 +15,33 @@
   // Drop your image at this path in the repo, or change the path to match.
   const DEFAULT_LOGO_SRC = 'assets/default-logo.png';
 
-  let logoImage = null;
+  let defaultLogoImage = null;   // bundled logo, loaded once at startup
+  let uploadedLogoImage = null;  // user-uploaded logo, takes priority when present
   let renderTimer = null;
 
   postmarkDate.textContent = new Date().toLocaleDateString('en-US', {
     month: 'short', day: '2-digit', year: 'numeric'
   });
 
+  // Returns whichever logo should currently be drawn, or null for none.
+  function activeLogo() {
+    if (uploadedLogoImage) return uploadedLogoImage;
+    if (useDefaultCheckbox.checked && defaultLogoImage) return defaultLogoImage;
+    return null;
+  }
+
   function loadDefaultLogo() {
     const img = new Image();
     img.onload = () => {
-      logoImage = img;
-      logoClearBtn.hidden = false;
-      if (ecSelect.value !== 'H') ecSelect.value = 'H';
+      defaultLogoImage = img;
       render();
     };
-    // If the file isn't there, just start with no logo — no error shown to the user.
-    img.onerror = () => render();
+    // If the file isn't there, just start with no default logo — no error shown to the user.
+    img.onerror = () => {
+      useDefaultCheckbox.checked = false;
+      useDefaultCheckbox.disabled = true;
+      render();
+    };
     img.src = DEFAULT_LOGO_SRC;
   }
 
@@ -40,7 +51,7 @@
   }
 
   function updateEcHint() {
-    if (logoImage) {
+    if (activeLogo()) {
       ecHint.textContent = 'A center image is set — H is recommended so the code still scans.';
       if (ecSelect.value !== 'H') {
         ecHint.textContent += ' Currently using ' + ecSelect.value + '.';
@@ -106,7 +117,8 @@
       }
     }
 
-    if (logoImage) {
+    const logo = activeLogo();
+    if (logo) {
       const logoSize = size * 0.2;
       const x = (size - logoSize) / 2;
       const y = (size - logoSize) / 2;
@@ -116,7 +128,7 @@
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(x - pad, y - pad, logoSize + pad * 2, logoSize + pad * 2);
 
-      ctx.drawImage(logoImage, x, y, logoSize, logoSize);
+      ctx.drawImage(logo, x, y, logoSize, logoSize);
     }
 
     downloadBtn.disabled = false;
@@ -125,6 +137,7 @@
   textInput.addEventListener('input', scheduleRender);
   sizeSelect.addEventListener('change', render);
   ecSelect.addEventListener('change', render);
+  useDefaultCheckbox.addEventListener('change', render);
 
   logoInput.addEventListener('change', (e) => {
     const file = e.target.files && e.target.files[0];
@@ -134,7 +147,7 @@
     reader.onload = (ev) => {
       const img = new Image();
       img.onload = () => {
-        logoImage = img;
+        uploadedLogoImage = img;
         logoClearBtn.hidden = false;
         if (ecSelect.value !== 'H') ecSelect.value = 'H';
         render();
@@ -144,8 +157,10 @@
     reader.readAsDataURL(file);
   });
 
+  // "Remove uploaded" only clears the uploaded file — if the default-logo
+  // checkbox is still checked, the default logo takes back over.
   logoClearBtn.addEventListener('click', () => {
-    logoImage = null;
+    uploadedLogoImage = null;
     logoInput.value = '';
     logoClearBtn.hidden = true;
     render();
