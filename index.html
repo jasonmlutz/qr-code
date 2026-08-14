@@ -29,9 +29,15 @@
 
       <div class="field">
         <label for="logo-upload">Center image <span class="optional">(optional)</span></label>
+
+        <label class="checkbox-row" for="use-default-logo">
+          <input type="checkbox" id="use-default-logo" checked>
+          <span>Use default logo</span>
+        </label>
+
         <div class="file-row">
           <input type="file" id="logo-upload" accept="image/*">
-          <button type="button" id="logo-clear" class="ghost-btn" hidden>Remove</button>
+          <button type="button" id="logo-clear" class="ghost-btn" hidden>Remove uploaded</button>
         </div>
       </div>
 
