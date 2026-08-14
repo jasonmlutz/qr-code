@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scan &amp; Stamp — QR Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">No. 001 — LIVE ENCODER</p>
+    <h1>Make it<br>scannable.</h1>
+    <p class="lede">Type a link, drop in a logo, get a stamp you can print or share. Everything renders in your browser — nothing is uploaded anywhere.</p>
+  </header>
+
+  <main class="desk">
+
+    <section class="control-panel" aria-label="QR code settings">
+
+      <div class="field">
+        <label for="qr-text">Text or URL</label>
+        <input type="text" id="qr-text" placeholder="https://example.com" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="logo-upload">Center image <span class="optional">(optional)</span></label>
+        <div class="file-row">
+          <input type="file" id="logo-upload" accept="image/*">
+          <button type="button" id="logo-clear" class="ghost-btn" hidden>Remove</button>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="qr-size">Size</label>
+          <select id="qr-size">
+            <option value="256">256 px</option>
+            <option value="384">384 px</option>
+            <option value="512" selected>512 px</option>
+            <option value="768">768 px</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="ec-level">Error correction</label>
+          <select id="ec-level">
+            <option value="L">L — 7%</option>
+            <option value="M">M — 15%</option>
+            <option value="Q">Q — 25%</option>
+            <option value="H" selected>H — 30%</option>
+          </select>
+        </div>
+      </div>
+
+      <p class="hint" id="ec-hint"></p>
+
+    </section>
+
+    <section class="stamp-stage" aria-label="QR code output">
+      <div class="stamp" id="stamp">
+        <div class="postmark" id="postmark">GENERATED<br><span id="postmark-date"></span></div>
+        <canvas id="qr-canvas" width="512" height="512"></canvas>
+      </div>
+      <button type="button" id="download-btn" class="tab-btn" disabled>Download PNG ↓</button>
+    </section>
+
+  </main>
+
+  <footer class="colophon">
+    <p>Client-side only, via <a href="https://github.com/kazuhikoarase/qrcode-generator" target="_blank" rel="noopener">qrcode-generator</a>. Higher error correction survives a center logo — keep the logo under ~20% of the code's area.</p>
+  </footer>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
