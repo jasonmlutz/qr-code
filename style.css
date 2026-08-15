@@ -131,6 +131,10 @@ button:focus-visible {
   margin-bottom: 8px;
 }
 
+.logo-type-label {
+  margin-top: 12px;
+}
+
 .radio-group {
   border: none;
   margin: 0 0 12px;
