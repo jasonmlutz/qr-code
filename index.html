@@ -10,6 +10,58 @@
 </head>
 <body>
 
+<button type="button" id="help-btn" class="help-btn" aria-haspopup="dialog" aria-controls="help-modal">
+  Help: Will this scan in real life?
+</button>
+
+<div class="modal-overlay" id="help-overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="help-modal-title" id="help-modal">
+    <button type="button" id="help-close" class="modal-close" aria-label="Close help">✕</button>
+
+    <h2 id="help-modal-title">Will this scan in real life?</h2>
+
+    <p>Verify confirms the code encodes correctly — it can't guarantee a phone will read it in the wild, since that depends on how big and how far away the code ends up being printed or shown. Rule of thumb:</p>
+
+    <p class="modal-rule">minimum size ≈ scanning distance ÷ 10</p>
+
+    <table class="modal-table">
+      <thead>
+        <tr>
+          <th>Use case</th>
+          <th>Scan distance</th>
+          <th>Minimum size</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Business card / handout</td>
+          <td>~1 ft (arm's length)</td>
+          <td>1 in (2.5 cm)</td>
+        </tr>
+        <tr>
+          <td>Flyer or poster</td>
+          <td>~3 ft</td>
+          <td>3.5 in (9 cm)</td>
+        </tr>
+        <tr>
+          <td>Storefront sign</td>
+          <td>~10 ft</td>
+          <td>12 in (30 cm)</td>
+        </tr>
+        <tr>
+          <td>Projected slide, back row</td>
+          <td>~20 ft</td>
+          <td>24 in (60 cm) on-screen</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>Longer URLs pack in more detail and need extra size to stay scannable — shortening the link is usually the easiest fix. Sharing a code on a screen for someone to scan off <em>another</em> screen (e.g. a slide deck) is its own risk — keep those codes short, and consider adding the link as a backup.</p>
+
+    <p><a href="https://www.uniqode.com/blog/qr-code-best-practices/how-to-perfectly-size-your-qr-codes" target="_blank" rel="noopener">More on QR code sizing →</a></p>
+  </div>
+</div>
+
 <div class="wrap">
 
   <header class="masthead">
