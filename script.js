@@ -1,8 +1,9 @@
 (() => {
   const textInput = document.getElementById('qr-text');
   const logoModeRadios = document.querySelectorAll('input[name="logo-mode"]');
+  const logoTypeRadios = document.querySelectorAll('input[name="logo-type"]');
   const logoInput = document.getElementById('logo-upload');
-  const defaultLogoColorField = document.getElementById('default-logo-color-field');
+  const defaultLogoOptionsField = document.getElementById('default-logo-options-field');
   const defaultLogoColorSelect = document.getElementById('default-logo-color');
   const bgColorSelect = document.getElementById('bg-color');
   const qrColorSelect = document.getElementById('qr-color');
@@ -17,30 +18,47 @@
   const verifyStatus = document.getElementById('verify-status');
   const postmarkDate = document.getElementById('postmark-date');
 
-  // Paths to bundled default logos, relative to index.html.
-  // Drop your images at these paths in the repo, or change to match.
+  const COLORS = ['black', 'red', 'white'];
+  const TYPES = ['solid', 'outline'];
+
+  // Paths to the 6 bundled default logos (3 colors x 2 types), relative to
+  // index.html. Drop your images at these paths in the repo, or change to match.
   const DEFAULT_LOGO_SRC = {
-    black: 'assets/default-logo-black.png',
-    red: 'assets/default-logo-red.png',
-    white: 'assets/default-logo-white.png'
+    black: {
+      solid: 'assets/default_logo_black_solid.png',
+      outline: 'assets/default_logo_black_outline.png'
+    },
+    red: {
+      solid: 'assets/default_logo_red_solid.png',
+      outline: 'assets/default_logo_red_outline.png'
+    },
+    white: {
+      solid: 'assets/default_logo_white_solid.png',
+      outline: 'assets/default_logo_white_outline.png'
+    }
   };
 
-  // Solid fill color of each default logo asset, used for contrast checks
-  // and for auto-matching the QR color to the chosen default logo.
+  // Solid fill color per logo color (same for solid and outline variants),
+  // used for contrast checks and for auto-matching the QR color.
   const DEFAULT_LOGO_HEX = {
     black: '#000000',
     red: '#be0f34',
     white: '#ffffff'
   };
 
-  // Sensible default background per default-logo color (still overridable).
+  // Sensible default background per default-logo color — shared by both the
+  // solid and outline variant of that color, still overridable.
   const DEFAULT_BG_FOR_LOGO = {
     black: '#ffffff',
     red: '#ffffff',
     white: '#000000'
   };
 
-  const defaultLogoImages = { black: null, red: null, white: null };
+  const defaultLogoImages = {
+    black: { solid: null, outline: null },
+    red: { solid: null, outline: null },
+    white: { solid: null, outline: null }
+  };
   let uploadedLogoImage = null;
   let renderTimer = null;
 
@@ -53,6 +71,11 @@
     return checked ? checked.value : 'none';
   }
 
+  function currentLogoType() {
+    const checked = document.querySelector('input[name="logo-type"]:checked');
+    return checked ? checked.value : 'solid';
+  }
+
   // Returns { image, hex } for the active logo, or null if none is active.
   // hex is null for custom uploads, since we don't know their fill color.
   function activeLogo() {
@@ -62,23 +85,24 @@
     }
     if (mode === 'default') {
       const color = defaultLogoColorSelect.value;
-      const img = defaultLogoImages[color];
+      const type = currentLogoType();
+      const img = defaultLogoImages[color][type];
       if (img) return { image: img, hex: DEFAULT_LOGO_HEX[color] };
     }
     return null;
   }
 
-  function loadDefaultLogo(color) {
+  function loadDefaultLogo(color, type) {
     const img = new Image();
     img.onload = () => {
-      defaultLogoImages[color] = img;
+      defaultLogoImages[color][type] = img;
       render();
     };
     img.onerror = () => {
       // Asset missing — leave that slot null; render() just skips drawing a logo.
       render();
     };
-    img.src = DEFAULT_LOGO_SRC[color];
+    img.src = DEFAULT_LOGO_SRC[color][type];
   }
 
   function scheduleRender() {
@@ -153,7 +177,7 @@
   function updateFieldVisibility() {
     const mode = currentLogoMode();
     logoInput.disabled = mode !== 'custom';
-    defaultLogoColorField.hidden = mode !== 'default';
+    defaultLogoOptionsField.hidden = mode !== 'default';
   }
 
   function render() {
@@ -268,6 +292,10 @@
     render();
   });
 
+  logoTypeRadios.forEach((radio) => {
+    radio.addEventListener('change', render);
+  });
+
   logoInput.addEventListener('change', (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
@@ -310,8 +338,10 @@
     }
   });
 
-  loadDefaultLogo('black');
-  loadDefaultLogo('red');
-  loadDefaultLogo('white');
+  COLORS.forEach((color) => {
+    TYPES.forEach((type) => {
+      loadDefaultLogo(color, type);
+    });
+  });
   render();
 })();
