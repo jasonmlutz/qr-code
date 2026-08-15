@@ -112,6 +112,8 @@
         <canvas id="qr-canvas" width="512" height="512"></canvas>
       </div>
       <button type="button" id="download-btn" class="tab-btn" disabled>Download PNG ↓</button>
+      <button type="button" id="verify-btn" class="ghost-btn wide" disabled>Verify scan</button>
+      <p class="verify-status" id="verify-status" data-state="idle" aria-live="polite"></p>
     </section>
 
   </main>
@@ -122,6 +124,7 @@
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="script.js"></script>
 </body>
