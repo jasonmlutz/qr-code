@@ -17,6 +17,9 @@
   const verifyBtn = document.getElementById('verify-btn');
   const verifyStatus = document.getElementById('verify-status');
   const postmarkDate = document.getElementById('postmark-date');
+  const helpBtn = document.getElementById('help-btn');
+  const helpOverlay = document.getElementById('help-overlay');
+  const helpClose = document.getElementById('help-close');
 
   const COLORS = ['black', 'red', 'white'];
   const TYPES = ['solid', 'outline'];
@@ -336,6 +339,27 @@
     } else {
       setVerifyState('mismatch', '✕ Decoded text does not match the original.');
     }
+  });
+
+  function openHelp() {
+    helpOverlay.hidden = false;
+    helpClose.focus();
+  }
+
+  function closeHelp() {
+    helpOverlay.hidden = true;
+    helpBtn.focus();
+  }
+
+  helpBtn.addEventListener('click', openHelp);
+  helpClose.addEventListener('click', closeHelp);
+
+  helpOverlay.addEventListener('click', (e) => {
+    if (e.target === helpOverlay) closeHelp();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !helpOverlay.hidden) closeHelp();
   });
 
   COLORS.forEach((color) => {
