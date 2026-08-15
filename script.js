@@ -1,8 +1,12 @@
 (() => {
   const textInput = document.getElementById('qr-text');
+  const logoModeRadios = document.querySelectorAll('input[name="logo-mode"]');
   const logoInput = document.getElementById('logo-upload');
-  const logoClearBtn = document.getElementById('logo-clear');
-  const useDefaultCheckbox = document.getElementById('use-default-logo');
+  const defaultLogoColorField = document.getElementById('default-logo-color-field');
+  const defaultLogoColorSelect = document.getElementById('default-logo-color');
+  const bgColorSelect = document.getElementById('bg-color');
+  const qrColorSelect = document.getElementById('qr-color');
+  const contrastWarning = document.getElementById('contrast-warning');
   const sizeSelect = document.getElementById('qr-size');
   const ecSelect = document.getElementById('ec-level');
   const ecHint = document.getElementById('ec-hint');
@@ -11,38 +15,68 @@
   const downloadBtn = document.getElementById('download-btn');
   const postmarkDate = document.getElementById('postmark-date');
 
-  // Path to a bundled default logo, relative to index.html.
-  // Drop your image at this path in the repo, or change the path to match.
-  const DEFAULT_LOGO_SRC = 'assets/default-logo.png';
+  // Paths to bundled default logos, relative to index.html.
+  // Drop your images at these paths in the repo, or change to match.
+  const DEFAULT_LOGO_SRC = {
+    black: 'assets/default-logo-black.png',
+    red: 'assets/default-logo-red.png',
+    white: 'assets/default-logo-white.png'
+  };
 
-  let defaultLogoImage = null;   // bundled logo, loaded once at startup
-  let uploadedLogoImage = null;  // user-uploaded logo, takes priority when present
+  // Solid fill color of each default logo asset, used for contrast checks
+  // and for auto-matching the QR color to the chosen default logo.
+  const DEFAULT_LOGO_HEX = {
+    black: '#000000',
+    red: '#be0f34',
+    white: '#ffffff'
+  };
+
+  // Sensible default background per default-logo color (still overridable).
+  const DEFAULT_BG_FOR_LOGO = {
+    black: '#ffffff',
+    red: '#ffffff',
+    white: '#000000'
+  };
+
+  const defaultLogoImages = { black: null, red: null, white: null };
+  let uploadedLogoImage = null;
   let renderTimer = null;
 
   postmarkDate.textContent = new Date().toLocaleDateString('en-US', {
     month: 'short', day: '2-digit', year: 'numeric'
   });
 
-  // Returns whichever logo should currently be drawn, or null for none.
+  function currentLogoMode() {
+    const checked = document.querySelector('input[name="logo-mode"]:checked');
+    return checked ? checked.value : 'none';
+  }
+
+  // Returns { image, hex } for the active logo, or null if none is active.
+  // hex is null for custom uploads, since we don't know their fill color.
   function activeLogo() {
-    if (uploadedLogoImage) return uploadedLogoImage;
-    if (useDefaultCheckbox.checked && defaultLogoImage) return defaultLogoImage;
+    const mode = currentLogoMode();
+    if (mode === 'custom' && uploadedLogoImage) {
+      return { image: uploadedLogoImage, hex: null };
+    }
+    if (mode === 'default') {
+      const color = defaultLogoColorSelect.value;
+      const img = defaultLogoImages[color];
+      if (img) return { image: img, hex: DEFAULT_LOGO_HEX[color] };
+    }
     return null;
   }
 
-  function loadDefaultLogo() {
+  function loadDefaultLogo(color) {
     const img = new Image();
     img.onload = () => {
-      defaultLogoImage = img;
+      defaultLogoImages[color] = img;
       render();
     };
-    // If the file isn't there, just start with no default logo — no error shown to the user.
     img.onerror = () => {
-      useDefaultCheckbox.checked = false;
-      useDefaultCheckbox.disabled = true;
+      // Asset missing — leave that slot null; render() just skips drawing a logo.
       render();
     };
-    img.src = DEFAULT_LOGO_SRC;
+    img.src = DEFAULT_LOGO_SRC[color];
   }
 
   function scheduleRender() {
@@ -50,8 +84,56 @@
     renderTimer = setTimeout(render, 120);
   }
 
-  function updateEcHint() {
-    if (activeLogo()) {
+  // --- WCAG-style contrast ratio, used only for the advisory warning ---
+  function relativeLuminance(hex) {
+    const c = hex.replace('#', '');
+    const r = parseInt(c.substring(0, 2), 16) / 255;
+    const g = parseInt(c.substring(2, 4), 16) / 255;
+    const b = parseInt(c.substring(4, 6), 16) / 255;
+    const lin = (v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+    return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+  }
+
+  function contrastRatio(hexA, hexB) {
+    const lA = relativeLuminance(hexA);
+    const lB = relativeLuminance(hexB);
+    const lighter = Math.max(lA, lB);
+    const darker = Math.min(lA, lB);
+    return (lighter + 0.05) / (darker + 0.05);
+  }
+
+  // Threshold below which we warn. 3:1 is the WCAG floor for non-text
+  // graphical elements; QR codes want more headroom than that in practice,
+  // but this is advisory only, per design — never blocks the user.
+  const WARN_THRESHOLD = 3;
+
+  function updateContrastWarning(logo) {
+    const bg = bgColorSelect.value;
+    const qrColor = qrColorSelect.value;
+    const issues = [];
+
+    const qrBgRatio = contrastRatio(qrColor, bg);
+    if (qrBgRatio < WARN_THRESHOLD) {
+      issues.push('QR code color is too close to the background — this may not scan.');
+    }
+
+    if (logo && logo.hex) {
+      const logoBgRatio = contrastRatio(logo.hex, bg);
+      if (logoBgRatio < WARN_THRESHOLD) {
+        issues.push('Logo color is too close to the background — it may be hard to see.');
+      }
+    }
+
+    if (issues.length) {
+      contrastWarning.textContent = '⚠ ' + issues.join(' ');
+      contrastWarning.hidden = false;
+    } else {
+      contrastWarning.hidden = true;
+    }
+  }
+
+  function updateEcHint(logo) {
+    if (logo) {
       ecHint.textContent = 'A center image is set — H is recommended so the code still scans.';
       if (ecSelect.value !== 'H') {
         ecHint.textContent += ' Currently using ' + ecSelect.value + '.';
@@ -61,16 +143,27 @@
     }
   }
 
+  function updateFieldVisibility() {
+    const mode = currentLogoMode();
+    logoInput.disabled = mode !== 'custom';
+    defaultLogoColorField.hidden = mode !== 'default';
+  }
+
   function render() {
+    updateFieldVisibility();
+
     const text = textInput.value.trim();
     const size = parseInt(sizeSelect.value, 10);
     const ecLevel = ecSelect.value;
+    const bg = bgColorSelect.value;
+    const qrColor = qrColorSelect.value;
+    const logo = activeLogo();
 
     canvas.width = size;
     canvas.height = size;
-    ctx.clearRect(0, 0, size, size);
 
-    updateEcHint();
+    updateEcHint(logo);
+    updateContrastWarning(logo);
 
     if (!text) {
       downloadBtn.disabled = true;
@@ -100,9 +193,9 @@
     const moduleCount = qr.getModuleCount();
     const cell = size / moduleCount;
 
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = bg;
     ctx.fillRect(0, 0, size, size);
-    ctx.fillStyle = '#1b2a41';
+    ctx.fillStyle = qrColor;
 
     for (let row = 0; row < moduleCount; row++) {
       for (let col = 0; col < moduleCount; col++) {
@@ -117,18 +210,18 @@
       }
     }
 
-    const logo = activeLogo();
     if (logo) {
       const logoSize = size * 0.2;
       const x = (size - logoSize) / 2;
       const y = (size - logoSize) / 2;
       const pad = logoSize * 0.12;
 
-      // white backing plate so the logo doesn't blend into surrounding modules
-      ctx.fillStyle = '#ffffff';
+      // backing plate matches the background so it doesn't read as a
+      // stray box when the background isn't white
+      ctx.fillStyle = bg;
       ctx.fillRect(x - pad, y - pad, logoSize + pad * 2, logoSize + pad * 2);
 
-      ctx.drawImage(logo, x, y, logoSize, logoSize);
+      ctx.drawImage(logo.image, x, y, logoSize, logoSize);
     }
 
     downloadBtn.disabled = false;
@@ -137,7 +230,32 @@
   textInput.addEventListener('input', scheduleRender);
   sizeSelect.addEventListener('change', render);
   ecSelect.addEventListener('change', render);
-  useDefaultCheckbox.addEventListener('change', render);
+  bgColorSelect.addEventListener('change', render);
+  qrColorSelect.addEventListener('change', render);
+
+  logoModeRadios.forEach((radio) => {
+    radio.addEventListener('change', () => {
+      const mode = currentLogoMode();
+      if (mode === 'default') {
+        // Auto-match background and QR color to the selected default logo,
+        // still fully overridable afterward.
+        const color = defaultLogoColorSelect.value;
+        bgColorSelect.value = DEFAULT_BG_FOR_LOGO[color];
+        qrColorSelect.value = DEFAULT_LOGO_HEX[color];
+        if (ecSelect.value !== 'H') ecSelect.value = 'H';
+      } else if (mode === 'custom' && uploadedLogoImage) {
+        if (ecSelect.value !== 'H') ecSelect.value = 'H';
+      }
+      render();
+    });
+  });
+
+  defaultLogoColorSelect.addEventListener('change', () => {
+    const color = defaultLogoColorSelect.value;
+    bgColorSelect.value = DEFAULT_BG_FOR_LOGO[color];
+    qrColorSelect.value = DEFAULT_LOGO_HEX[color];
+    render();
+  });
 
   logoInput.addEventListener('change', (e) => {
     const file = e.target.files && e.target.files[0];
@@ -148,22 +266,12 @@
       const img = new Image();
       img.onload = () => {
         uploadedLogoImage = img;
-        logoClearBtn.hidden = false;
         if (ecSelect.value !== 'H') ecSelect.value = 'H';
         render();
       };
       img.src = ev.target.result;
     };
     reader.readAsDataURL(file);
-  });
-
-  // "Remove uploaded" only clears the uploaded file — if the default-logo
-  // checkbox is still checked, the default logo takes back over.
-  logoClearBtn.addEventListener('click', () => {
-    uploadedLogoImage = null;
-    logoInput.value = '';
-    logoClearBtn.hidden = true;
-    render();
   });
 
   downloadBtn.addEventListener('click', () => {
@@ -173,5 +281,8 @@
     link.click();
   });
 
-  loadDefaultLogo();
+  loadDefaultLogo('black');
+  loadDefaultLogo('red');
+  loadDefaultLogo('white');
+  render();
 })();
