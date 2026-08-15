@@ -122,22 +122,52 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
-.checkbox-row {
+.group-label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.radio-group {
+  border: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+}
+
+.radio-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-size: 13px;
   text-transform: none;
   letter-spacing: normal;
-  margin-bottom: 10px;
   cursor: pointer;
 }
 
-.checkbox-row input[type="checkbox"] {
-  width: 15px;
-  height: 15px;
+.radio-row input[type="radio"] {
   accent-color: var(--stamp-red);
   cursor: pointer;
+}
+
+.file-row input[type="file"]:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+select:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.hint.warning {
+  color: var(--stamp-red);
+  font-weight: 600;
 }
 
 .file-row {
