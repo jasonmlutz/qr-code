@@ -278,6 +278,55 @@ input[type="file"] {
   cursor: not-allowed;
 }
 
+.ghost-btn.wide {
+  width: 100%;
+  padding: 10px 22px;
+  font-size: 12px;
+}
+
+.ghost-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ghost-btn:disabled:hover {
+  background: none;
+  color: var(--ink);
+}
+
+.verify-status {
+  font-family: var(--mono-face);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 18px;
+  margin: 0;
+}
+
+.verify-status::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--perforation);
+}
+
+.verify-status[data-state="match"] {
+  color: var(--olive);
+}
+.verify-status[data-state="match"]::before {
+  background: var(--olive);
+}
+
+.verify-status[data-state="mismatch"] {
+  color: var(--stamp-red);
+}
+.verify-status[data-state="mismatch"]::before {
+  background: var(--stamp-red);
+}
+
 /* ---------- colophon ---------- */
 
 .colophon {
