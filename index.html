@@ -48,13 +48,25 @@
           <input type="file" id="logo-upload" accept="image/*" disabled>
         </div>
 
-        <div class="field" id="default-logo-color-field" hidden>
+        <div class="field" id="default-logo-options-field" hidden>
           <label for="default-logo-color">Default logo color</label>
           <select id="default-logo-color">
             <option value="black">Black</option>
             <option value="red">Red</option>
             <option value="white">White</option>
           </select>
+
+          <span class="group-label logo-type-label">Logo type</span>
+          <fieldset class="radio-group" id="logo-type-group">
+            <label class="radio-row">
+              <input type="radio" name="logo-type" value="solid" checked>
+              <span>Solid</span>
+            </label>
+            <label class="radio-row">
+              <input type="radio" name="logo-type" value="outline">
+              <span>Outline</span>
+            </label>
+          </fieldset>
         </div>
       </div>
 
