@@ -13,6 +13,8 @@
   const canvas = document.getElementById('qr-canvas');
   const ctx = canvas.getContext('2d');
   const downloadBtn = document.getElementById('download-btn');
+  const verifyBtn = document.getElementById('verify-btn');
+  const verifyStatus = document.getElementById('verify-status');
   const postmarkDate = document.getElementById('postmark-date');
 
   // Paths to bundled default logos, relative to index.html.
@@ -84,6 +86,11 @@
     renderTimer = setTimeout(render, 120);
   }
 
+  function setVerifyState(state, message) {
+    verifyStatus.dataset.state = state;
+    verifyStatus.textContent = message || '';
+  }
+
   // --- WCAG-style contrast ratio, used only for the advisory warning ---
   function relativeLuminance(hex) {
     const c = hex.replace('#', '');
@@ -151,6 +158,7 @@
 
   function render() {
     updateFieldVisibility();
+    setVerifyState('idle', '');
 
     const text = textInput.value.trim();
     const size = parseInt(sizeSelect.value, 10);
@@ -167,6 +175,7 @@
 
     if (!text) {
       downloadBtn.disabled = true;
+      verifyBtn.disabled = true;
       ctx.fillStyle = '#f1e9d8';
       ctx.fillRect(0, 0, size, size);
       ctx.fillStyle = '#c9c2ae';
@@ -183,6 +192,7 @@
       qr.make();
     } catch (err) {
       downloadBtn.disabled = true;
+      verifyBtn.disabled = true;
       ctx.fillStyle = '#c1443c';
       ctx.font = '13px "IBM Plex Mono", monospace';
       ctx.textAlign = 'center';
@@ -225,6 +235,7 @@
     }
 
     downloadBtn.disabled = false;
+    verifyBtn.disabled = false;
   }
 
   textInput.addEventListener('input', scheduleRender);
@@ -279,6 +290,24 @@
     link.download = 'qr-code.png';
     link.href = canvas.toDataURL('image/png');
     link.click();
+  });
+
+  verifyBtn.addEventListener('click', () => {
+    const expected = textInput.value.trim();
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const result = jsQR(imageData.data, imageData.width, imageData.height);
+
+    if (!result) {
+      setVerifyState('mismatch', '✕ Could not read a QR code in this image.');
+      return;
+    }
+
+    // Case-sensitive comparison against exactly what was encoded.
+    if (result.data === expected) {
+      setVerifyState('match', '✓ Verified — decodes back to the original text.');
+    } else {
+      setVerifyState('mismatch', '✕ Decoded text does not match the original.');
+    }
   });
 
   loadDefaultLogo('black');
