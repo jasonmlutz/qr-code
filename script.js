@@ -21,8 +21,6 @@
   const helpOverlay = document.getElementById('help-overlay');
   const helpClose = document.getElementById('help-close');
 
-  helpOverlay.hidden = false;
-
   const COLORS = ['black', 'red', 'white'];
   const TYPES = ['solid', 'outline'];
 
