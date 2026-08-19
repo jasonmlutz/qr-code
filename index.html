@@ -74,14 +74,14 @@
 
       <div class="field">
         <label for="qr-text">Text or URL</label>
-        <input type="text" id="qr-text" placeholder="https://example.com" autocomplete="off">
+        <input type="text" id="qr-text" value="https://example.com" placeholder="https://example.com" autocomplete="off">
       </div>
 
       <div class="field">
         <span class="group-label">Center image</span>
         <fieldset class="radio-group" id="logo-mode-group">
           <label class="radio-row">
-            <input type="radio" name="logo-mode" value="none" checked>
+            <input type="radio" name="logo-mode" value="none">
             <span>None</span>
           </label>
           <label class="radio-row">
@@ -89,7 +89,7 @@
             <span>Custom upload</span>
           </label>
           <label class="radio-row">
-            <input type="radio" name="logo-mode" value="default">
+            <input type="radio" name="logo-mode" value="default" checked>
             <span>Default logo</span>
           </label>
         </fieldset>
@@ -101,9 +101,10 @@
         <div class="field" id="default-logo-options-field" hidden>
           <label for="default-logo-color">Default logo color</label>
           <select id="default-logo-color">
-            <option value="black">Black</option>
-            <option value="red">Red</option>
-            <option value="white">White</option>
+            <option value="black">Cross - Black</option>
+            <option value="red">Cross- Red</option>
+            <option value="white">Cross- White</option>
+            <option value="text">Text - Red</option>
           </select>
 
           <span class="group-label logo-type-label">Logo type</span>

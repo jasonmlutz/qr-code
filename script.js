@@ -21,7 +21,7 @@
   const helpOverlay = document.getElementById('help-overlay');
   const helpClose = document.getElementById('help-close');
 
-  const COLORS = ['black', 'red', 'white'];
+  const COLORS = ['black', 'red', 'white', 'text'];
   const TYPES = ['solid', 'outline'];
 
   // Paths to the 6 bundled default logos (3 colors x 2 types), relative to
@@ -38,6 +38,10 @@
     white: {
       solid: 'assets/default_logo_white_solid.png',
       outline: 'assets/default_logo_white_outline.png'
+    },
+    text: {
+      solid: 'assets/default_logo_red_text_solid.png',
+      outline: 'assets/default_logo_red_text_outline.png'
     }
   };
 
@@ -46,7 +50,8 @@
   const DEFAULT_LOGO_HEX = {
     black: '#000000',
     red: '#be0f34',
-    white: '#ffffff'
+    white: '#ffffff',
+    text: '#be0f34',
   };
 
   // Sensible default background per default-logo color — shared by both the
@@ -54,13 +59,15 @@
   const DEFAULT_BG_FOR_LOGO = {
     black: '#ffffff',
     red: '#ffffff',
-    white: '#000000'
+    white: '#000000',
+    text: '#ffffff',
   };
 
   const defaultLogoImages = {
     black: { solid: null, outline: null },
     red: { solid: null, outline: null },
-    white: { solid: null, outline: null }
+    white: { solid: null, outline: null },
+    text: { solid: null, outline: null}
   };
   let uploadedLogoImage = null;
   let renderTimer = null;
